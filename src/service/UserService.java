@@ -1,49 +1,61 @@
+
 package src.service;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
+
+import src.db.DatabaseConnection;
 import src.model.InvestmentPlan;
 import src.model.User;
 import src.plan.AggressivePlan;
 import src.plan.ConservativePlan;
-
 public class UserService {
     private final Scanner input = new Scanner(System.in);
     private final Map<Integer, User> userDatabase = new HashMap<>();
-    private int userIdCounter = 1;
 
-    public void signUp() {
-        System.out.println("=== Sign Up ===");
-        try {
-            System.out.print("Enter your name: ");
-            String name = input.nextLine();
-    
-            System.out.print("Enter a password (must be more than 8 characters): ");
-            String password = input.nextLine();
-            while (password.length() <= 8) {
-                System.out.println("Password too short! Please enter a password with more than 8 characters.");
-                System.out.print("Enter a password: ");
-                password = input.nextLine();
-            }
-    
-            int age = promptForInt("Enter your age: ", 18, 120); // Prompt for age (e.g., min 18 for eligibility)
-    
-            User newUser = new User(userIdCounter++, name, password, age);
-            userDatabase.put(newUser.getUserId(), newUser);
-    
-            System.out.println("Sign Up successful! Your User ID is: " + newUser.getUserId());
-            System.out.println("Please keep your User ID secure. You will need it to log in.");
+      public void signUp() {
+    System.out.println("=== Sign Up ===");
+    try (Connection conn = DatabaseConnection.getConnection()) {
+        System.out.print("Enter your name: ");
+        String name = input.nextLine();
 
-        } catch (InputMismatchException e) {
-            System.out.println("Invalid input! Please try again.");
-            input.nextLine(); // Clear invalid input
+        System.out.print("Enter a password (must be more than 8 characters): ");
+        String password = input.nextLine();
+        while (password.length() <= 8) {
+            System.out.println("Password too short! Please enter a password with more than 8 characters.");
+            System.out.print("Enter a password: ");
+            password = input.nextLine();
         }
+
+        int age = promptForInt("Enter your age: ", 18, 120);
+
+        String sql = "INSERT INTO users (name, password, age) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, name);
+            stmt.setString(2, password);
+            stmt.setInt(3, age);
+            stmt.executeUpdate();
+
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int userId = generatedKeys.getInt(1);
+                    System.out.println("Sign Up successful! Your User ID is: " + userId);
+                    User user = new User(userId, name, password, age);
+                    userDatabase.put(userId, user);
+                }
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("SQL Error: " + e.getMessage());
+        System.out.println("Error during sign-up. Please try again.");
     }
+}
     
-    
-
-
     public void login() {
         System.out.println("=== Login ===");
         try {
