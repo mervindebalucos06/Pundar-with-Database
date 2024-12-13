@@ -1,5 +1,6 @@
 import java.util.Scanner;
-import src.service.UserService;
+
+import src.service.UserService; // Update the package name to the correct one
 
 public class Main {
   public static void main(String[] args) {
@@ -8,11 +9,20 @@ public class Main {
 
     try (Scanner input = new Scanner(System.in)) { // Use try-with-resources for Scanner
       while (!exit) {
-        System.out.println("\n=== Pundar: Retirement Investment Planning System ===");
-        System.out.println("1. Sign Up");
-        System.out.println("2. Login");
-        System.out.println("3. About Us");
-        System.out.println("4. Exit");
+      
+        System.out.println();
+        System.out.println("===============================================");
+        System.out.println("        P---  U---  N---  D---  A---  R---    ");
+        System.out.println("===============================================");
+        System.out.println(" *** Retirement Investment Planning System ***");
+        System.out.println("===============================================");
+        System.out.println("        Plan today for a secure tomorrow!      ");
+        System.out.println("===============================================");
+        System.out.println();
+        System.out.println("\t\t1. Sign Up");
+        System.out.println("\t\t2. Login");
+        System.out.println("\t\t3. About Us");
+        System.out.println("\t\t4. Exit");
         System.out.print("Choose an option: ");
 
         int choice = input.nextInt();
@@ -28,6 +38,7 @@ public class Main {
           default -> System.out.println("Invalid choice. Please try again.");
         }
       }
-    } // Scanner is automatically closed here
+    }
+    // Scanner is automatically closed here
+    }
   }
-}
